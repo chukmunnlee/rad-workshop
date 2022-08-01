@@ -51,12 +51,12 @@ app.get('/games/count', async (req, resp) => {
 	}
 })
 
-app.get('/game/:id', async (req, resp) => {
+app.get('/game/:gameId', async (req, resp) => {
 	try {
-		const result = await findGameById(parseInt(req.params.id))
+		const result = await findGameById(parseInt(req.params.gameId))
 		if (!result) {
 			resp.status(404)
-			resp.json(mkError(`Cannot find gameId ${req.params.id}`))
+			resp.json(mkError(`Cannot find gameId ${req.params.gameId}`))
 			return
 		}
 		resp.status(200)
@@ -65,6 +65,9 @@ app.get('/game/:id', async (req, resp) => {
 		resp.status(500)
 		resp.json(mkError(err))
 	}
+})
+
+app.get('/game/:gameId/comments', async (req, resp) => {
 })
 
 // Comments
