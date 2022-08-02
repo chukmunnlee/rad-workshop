@@ -1,8 +1,11 @@
 import express from 'express'
 import morgan from 'morgan'
 
-import { findAllGames, findGamesByName, findGameById, countGames } from './database.js'
-import { mkGameUrl, mkError } from './util.js'
+import { 
+	findAllGames, findGamesByName, findGameById, countGames, 
+	findCommentsByGameId, findCommentsByUser 
+} from './database.js'
+import { mkGameUrl, mkCommentUrl, mkError } from './util.js'
 
 const PORT = parseInt(process.env.PORT) || 3000
 
@@ -66,11 +69,37 @@ app.get('/game/:gameId', async (req, resp) => {
 		resp.json(mkError(err))
 	}
 })
+//
+// Comments
 
 app.get('/game/:gameId/comments', async (req, resp) => {
+	const gameId = parseInt(req.params.gameId)
+	const offset = parseInt(req.query.offset) || 0
+	const limit = parseInt(req.query.limit) || 10
+	try {
+		const result = await findCommentsByGameId(gameId, offset, limit)
+		resp.status(200)
+		resp.json(mkCommentUrl(result))
+	} catch (err) {
+		resp.status(500)
+		resp.json(mkError(err))
+	}
 })
 
-// Comments
+app.get('/comments/:user', async (req, resp) => {
+	const user = req.params.user
+	const offset = parseInt(req.query.offset) || 0
+	const limit = parseInt(req.query.limit) || 10
+	try {
+		const result = await findCommentsByUser(user, offset, limit)
+		resp.status(200)
+		resp.json(mkCommentUrl(result))
+	} catch (err) {
+		resp.status(500)
+		resp.json(mkError(err))
+	}
+})
+
 
 app.listen(PORT, () => {
 	console.info(`Application started on port ${PORT} at ${new Date()}`)

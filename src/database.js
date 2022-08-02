@@ -2,7 +2,7 @@ import { Database } from 'fakebase'
 
 const db = new Database("./data/bgg")
 const Games = db.table("game")
-const Comments = db.table("comments")
+const Comments = db.table("comment")
 
 export const findAllGames = (offset = 0, limit = 10) => {
 	return Games.findAll()
@@ -14,11 +14,22 @@ export const findGamesByName = (name) => {
 	return Games.findAll(g => g.name.toLowerCase().indexOf(n) != -1)
 }
 
-export const findGameById = (id) => {
-	return Games.findById(id)
+export const findGameById = (gameId) => {
+	return Games.findById(gameId)
 }
 
 export const countGames = () => {
 	return Games.findAll()
 		.then(result => result.length)
+}
+
+export const findCommentsByGameId = (gameId, offset = 0, limit = 10) => {
+	return Comments.findAll(c => c.gid == gameId)
+		.then(result => result.slice(offset, offset + limit))
+}
+
+export const findCommentsByUser = (user, offset = 0, limit = 10) => {
+	const u = user.toLowerCase()
+	return Comments.findAll(c => c.user.toLowerCase() == u)
+		.then(result => result.slice(offset, offset + limit))
 }
