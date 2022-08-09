@@ -3,7 +3,7 @@ import morgan from 'morgan'
 
 import { 
 	findAllGames, findGamesByName, findGameById, countGames, 
-	findCommentsByGameId, findCommentsByUser 
+	findCommentsByGameId, findCommentsByUser, findCommentById
 } from './database.js'
 import { mkGameUrl, mkCommentUrl, mkError } from './util.js'
 
@@ -94,6 +94,22 @@ app.get('/comments/:user', async (req, resp) => {
 		const result = await findCommentsByUser(user, offset, limit)
 		resp.status(200)
 		resp.json(mkCommentUrl(result))
+	} catch (err) {
+		resp.status(500)
+		resp.json(mkError(err))
+	}
+})
+
+app.get('/comment/:commentId', async (req, resp) => {
+	const commentId = req.params.commentId
+	try {
+		const comment = await findCommentById(commentId)
+		if (!comment) {
+			resp.status(404)
+			return resp.json(mkError({ error: `Comment ${commentId} not found`}))
+		}
+		resp.status(200)
+		resp.json(comment)
 	} catch (err) {
 		resp.status(500)
 		resp.json(mkError(err))

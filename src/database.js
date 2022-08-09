@@ -33,3 +33,7 @@ export const findCommentsByUser = (user, offset = 0, limit = 10) => {
 	return Comments.findAll(c => c.user.toLowerCase() == u)
 		.then(result => result.slice(offset, offset + limit))
 }
+
+export const findCommentById = (commentId) => {
+		return Comments.findById(commentId)
+}
