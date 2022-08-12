@@ -37,8 +37,23 @@ app.get('/game/:gameId', async (req, resp) => {
 			resp.json(mkError(`Cannot find gameId ${req.params.gameId}`))
 			return
 		}
-		resp.status(200)
-		resp.json(result)
+		resp.format({
+			'application/json': () => {
+				resp.status(200)
+				resp.json(result)
+			},
+			'text/csv': () => {
+				resp.status(200).contentType('text/csv')
+					.send(`
+id,name,year,ranking,users_rated,url,image
+${result.id},${result.name},${result.year},${result.ranking},${result.users_rated},${result.url},${result.image}
+					`)
+			},
+			default: () => {
+				resp.status(415)
+				resp.json(mkError(`Media ${req.header('Accept')} is not supported`))
+			}
+		})
 	} catch(err) {
 		resp.status(500)
 		resp.json(mkError(err))
