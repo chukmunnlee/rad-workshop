@@ -3,7 +3,8 @@ import morgan from 'morgan'
 
 import { 
 	findAllGames, findGamesByName, findGameById, countGames, 
-	findCommentsByGameId, findCommentsByUser, findCommentById
+	findCommentsByGameId, findCommentsByUser, findCommentById,
+	insertComment
 } from './database.js'
 import { mkGameUrl, mkCommentUrl, mkError } from './util.js'
 
@@ -13,6 +14,7 @@ const app = express()
 
 app.use(morgan("dev"))
 
+// Games
 app.get('/games', async (req, resp) => {
 	const offset = parseInt(req.query.offset) || 0
 	const limit = parseInt(req.query.limit) || 10
@@ -27,7 +29,22 @@ app.get('/games', async (req, resp) => {
 	}
 })
 
-// Games
+app.get('/game/:gameId', async (req, resp) => {
+	try {
+		const result = await findGameById(req.params.gameId)
+		if (!result) {
+			resp.status(404)
+			resp.json(mkError(`Cannot find gameId ${req.params.gameId}`))
+			return
+		}
+		resp.status(200)
+		resp.json(result)
+	} catch(err) {
+		resp.status(500)
+		resp.json(mkError(err))
+	}
+})
+
 app.get('/games/search', async (req, resp) => {
 	const q = req.query.q
 	if (!q) 
@@ -54,23 +71,29 @@ app.get('/games/count', async (req, resp) => {
 	}
 })
 
-app.get('/game/:gameId', async (req, resp) => {
-	try {
-		const result = await findGameById(parseInt(req.params.gameId))
-		if (!result) {
-			resp.status(404)
-			resp.json(mkError(`Cannot find gameId ${req.params.gameId}`))
-			return
-		}
-		resp.status(200)
-		resp.json(result)
-	} catch(err) {
-		resp.status(500)
-		resp.json(mkError(err))
-	}
-})
-//
+
 // Comments
+app.post('/comment', express.json(), async (req, resp) => {
+	const payload = req.body
+
+	for (const field of [ 'user', 'rating', 'c_text', 'gid' ])
+		if (!payload[field])
+			return resp.status(400)
+					.json(mkError(`Missing ${field} property` ))
+
+	if ((payload.rating < 1) || (payload.rating > 10))
+		return resp.status(400)
+				.json(mkError(`Valid rating range is between 1 and 10 (inclusive)`))
+
+	const game = await findGameById(payload.gid)
+	if (!game) 
+		return resp.status(400)
+				.json(mkError(`Cannot find game id ${payload.gid}`))
+
+	const id = await insertComment(payload)
+
+	return resp.status(200).json({ id })
+})
 
 app.get('/game/:gameId/comments', async (req, resp) => {
 	const gameId = parseInt(req.params.gameId)

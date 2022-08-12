@@ -15,7 +15,7 @@ export const findGamesByName = (name) => {
 }
 
 export const findGameById = (gameId) => {
-	return Games.findById(gameId)
+	return Games.findById(parseInt(gameId))
 }
 
 export const countGames = () => {
@@ -36,4 +36,9 @@ export const findCommentsByUser = (user, offset = 0, limit = 10) => {
 
 export const findCommentById = (commentId) => {
 		return Comments.findById(commentId)
+}
+
+export const insertComment = (comment) => {
+	return Comments.create(comment)
+		.then(result => result.id)
 }
