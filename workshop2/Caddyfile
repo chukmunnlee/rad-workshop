@@ -4,12 +4,12 @@
 		path /api/*
 	}
 
-	reverse_proxy @api {
-		to localhost:3000
-	}
-
 	@openapi {
 		path /openapi
+	}
+
+	reverse_proxy @api {
+		to localhost:3000
 	}
 
 	route @openapi {

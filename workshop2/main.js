@@ -25,8 +25,9 @@ app.get('/customers',
 	(req, resp) => {
 		const offset = parseInt(req.query.offset) || 0
 		const limit = parseInt(req.query.limit) || 3
+		const customers = getCustomers(offset, offset + limit)
 		resp.status(200).type('application/json')
-			.json(getCustomers(offset, offset + limit))
+			.json(customers.map(c => `/customer/${c.customerId}`))
 	}
 )
 

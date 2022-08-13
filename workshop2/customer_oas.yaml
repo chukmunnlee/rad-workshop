@@ -1,121 +1,150 @@
-openapi: "3.0.3"
+openapi: 3.0.3
+
 info:
-   title: "customer"
-   version: "1.0.0"
+  title: Customer
+  version: 1.0.0
 
 servers:
-- url: http://localhost:3000
-  description: "Development"
+- url: http://localhost:8080
+  description: Development 
 
 paths:
-   /api/customer/{custId}:
-      get:
-         description: Get customer
-         parameters:
-         - name: custId
-           in: path
-           required: true
-           schema:
-              type: number
-         responses:
-            '200':
-               description: customer record
-               content:
-                  application/json:
-                     schema:
-                        $ref: "#/components/schemas/customer"
-            '404':
-               description: customer not found
-               content:
-                  application/json:
-                     schema:
-                        $ref: "#/components/schemas/error-message"
+  /customers:
+    get:
+      description: Get all customers 
+      operationId: getCustomers
+      parameters:
+      - name: offset
+        in: query
+        description: Number of customer records to skip 
+        required: false
+        schema:
+          $ref: '#/components/schemas/Pagination'
 
-   /api/customers:
-      get:
-         description: Get customers
-         operationId: getCustomers
-         parameters:
-         - name: offset
-           in: query
-           required: false
-           schema:
-              type: number
-              default: 0
-         - name: limit
-           in: query
-           required: false
-           schema:
-              type: number
-              default: 3
-         responses:
-            '200':
-               description: customer record
-               content:
-                  application/json:
-                     schema:
-                        $ref: "#/components/schemas/customer-list"
+      - name: limit
+        in: query
+        description: Number of customer records to return 
+        required: false
+        schema:
+          $ref: '#/components/schemas/Pagination'
+      responses:
+        200:
+          description: List of customer URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerListResponse'
 
-   /api/customer:
-      post:
-         description: Insert new customer
-         operationId: insertCustomer
-         requestBody:
-            content:
-               application/x-www-form-urlencoded:
-                  schema:
-                     $ref: "#/components/schemas/customer"
-               application/json:
-                  schema:
-                     $ref: "#/components/schemas/customer"
-         responses:
-            '201':
-               description: customer record inserted
-               content: 
-                  application/json:
-                     schema:
-                        $ref: "#/components/schemas/customer-post"
-            '400':
-               description: cannot insert new customer
-               content:
-                  application/json:
-                     schema:
-                        $ref: "#/components/schemas/error-message"
+  /customer/{customerId}:
+    get:
+      description: Get a customer by customer id
+      operationId: getCustomerById
+      parameters:
+      - name: customerId
+        in: path
+        description: Valid customer id
+        required: true
+        schema: 
+          $ref: '#/components/schemas/CustomerId'
+      responses:
+        200:
+          description: Customer record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerGetResponse'
+        404: 
+          $ref: '#/components/responses/ErrorResponse'
+
+  /customer:
+    post:
+      description: Insert a new customer
+      operationId: insertCustomer
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerRequest'
+      responses:
+        201:
+          description: Customer inserted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerPostResponse'
+        400:
+          $ref: '#/components/responses/ErrorResponse'
 
 components:
-   schemas:
-      customer:
-         type: object
-         required: 
-         - customerId
-         - name
-         properties:
-            customerId:
-               type: number
-            name:
-               type: string
-            email:
-               type: string
-
-      customer-list:
-         type: array
-         items:
-            $ref: "#/components/schemas/customer"
-         minItems: 0
-
-      customer-post:
-         type: object
-         required: 
-         - message
-         - time
-         properties:
-            message:
-               type: string
-            time:
-               type: string
-
-      error-message:
-         type: object
-         properties:
-            message:
-               type: string
+  schemas:
+    Pagination:
+      type: integer
+      format: int32
+    Name:
+      type: string 
+      minLength: 3
+    Email:
+      type: string 
+      format: email
+    CustomerId:
+      type: integer
+      format: int32
+    CustomerRequest:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+        email: 
+          $ref: '#/components/schemas/Email'
+      required:
+      - name
+      - email
+    CustomerListResponse:
+      type: array
+      items:
+        type: string 
+        minLength: 1
+      minItems: 0
+    CustomerGetResponse:
+      type: object
+      properties:
+        customerId:
+          $ref: '#/components/schemas/CustomerId'
+        name:
+          $ref: '#/components/schemas/Name'
+        email: 
+          $ref: '#/components/schemas/Email'
+      required:
+      - customerId
+      - name
+      - email
+    CustomerPostResponse:
+      type: object
+      properties:
+        customerId:
+          $ref: '#/components/schemas/CustomerId'
+        message:
+          type: string
+        time: 
+          type: integer 
+          format: int64
+      required: 
+      - customerId
+      - message
+      - time
+  responses:
+    ErrorResponse:
+      description: Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                minLength: 1
+            required:
+            - message
