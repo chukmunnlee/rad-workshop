@@ -30,6 +30,9 @@ paths:
       responses:
         200:
           description: List of customer URL
+          headers:
+            Etag:
+              $ref: '#/components/headers/Etag'
           content:
             application/json:
               schema:
@@ -49,6 +52,9 @@ paths:
       responses:
         200:
           description: Customer record
+          headers:
+            Etag:
+              $ref: '#/components/headers/Etag'
           content:
             application/json:
               schema:
@@ -71,6 +77,9 @@ paths:
       responses:
         201:
           description: Customer inserted
+          headers:
+            Etag:
+              $ref: '#/components/headers/Etag'
           content:
             application/json:
               schema:
@@ -148,3 +157,8 @@ components:
                 minLength: 1
             required:
             - message
+  headers:
+    Etag:
+      description: Etag 
+      schema:
+        type: string
