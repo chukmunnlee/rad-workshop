@@ -1,5 +1,9 @@
 import express from 'express'
 import morgan from 'morgan'
+import rateLimit from 'express-rate-limit'
+
+// hack 
+import range from './node_modules/express-range/index.js'
 
 import { 
 	findAllGames, findGamesByName, findGameById, countGames, 
@@ -12,22 +16,44 @@ const PORT = parseInt(process.env.PORT) || 3000
 
 const app = express()
 
-app.use(morgan("dev"))
+app.use(rateLimit({
+	windowMs: 1000 * 5,
+	max: 2,
+	standardHeaders: true,
+	legacyHeaders: true
+}))
+
+app.use(morgan("common"))
 
 // Games
-app.get('/games', async (req, resp) => {
-	const offset = parseInt(req.query.offset) || 0
-	const limit = parseInt(req.query.limit) || 10
-
-	try {
-		const result = await findAllGames(offset, limit)
-		resp.status(200)
-		resp.json(mkGameUrl(result))
-	} catch (err) {
-		resp.status(500)
-		resp.json(mkError(err))
-	}
+app.head('/games', async (req, resp) => {
+	resp.set({'Accept-Ranges': 'game'})
+		.status(200)
+		.end()
 })
+
+app.get('/games', 
+	range({ accept: 'game', limit: 5 }),
+	async (req, resp) => {
+		const offset = parseInt(req.query.offset) || req.range.first 
+		const limit = parseInt(req.query.limit) || req.range.last - req.range.first + 1
+
+		try {
+			const result = await findAllGames(offset, limit)
+			const count = await countGames()
+			resp.status(206)
+			resp.range({
+				first: req.range.first,
+				last: req.range.last,
+				length: count
+			})
+			resp.json(mkGameUrl(result))
+		} catch (err) {
+			resp.status(500)
+			resp.json(mkError(err))
+		}
+	}
+)
 
 app.get('/game/:gameId', async (req, resp) => {
 	try {
@@ -153,7 +179,6 @@ app.get('/comment/:commentId', async (req, resp) => {
 		resp.json(mkError(err))
 	}
 })
-
 
 app.listen(PORT, () => {
 	console.info(`Application started on port ${PORT} at ${new Date()}`)

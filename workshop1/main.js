@@ -1,5 +1,9 @@
 import express from 'express'
 import morgan from 'morgan'
+import rateLimit from 'express-rate-limit'
+
+// hack 
+import range from './node_modules/express-range/index.js'
 
 import { 
 	findAllGames, findGamesByName, findGameById, countGames, 
@@ -12,14 +16,14 @@ const PORT = parseInt(process.env.PORT) || 3000
 
 const app = express()
 
-app.use(morgan("dev"))
+app.use(morgan("common"))
 
 // Games
-// TODO: GET /games
+// TODO GET /games
 
 
+// TODO GET /game/<game_id>
 
-// TODO: GET /game/<game_id>
 
 app.get('/games/search', async (req, resp) => {
 	const q = req.query.q
@@ -49,7 +53,7 @@ app.get('/games/count', async (req, resp) => {
 
 
 // Comments
-// TODO: POST /comment
+// TODO POST /comment
 
 
 app.get('/game/:gameId/comments', async (req, resp) => {
@@ -95,7 +99,6 @@ app.get('/comment/:commentId', async (req, resp) => {
 		resp.json(mkError(err))
 	}
 })
-
 
 app.listen(PORT, () => {
 	console.info(`Application started on port ${PORT} at ${new Date()}`)
