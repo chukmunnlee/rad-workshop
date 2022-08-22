@@ -1,0 +1,105 @@
+https://www.robinwieruch.de/getting-started-github-graphql-api/
+https://docs.github.com/en/graphql -> References
+
+query {
+	viewer {
+		id
+		name
+		login
+	}
+}
+
+// List the first 50 repositories from the newest
+query {
+	viewer {
+		repositories(first: 50, orderBy: { field: CREATED_AT, direction: DESC }) {
+			nodes {
+				name
+				url
+				description
+				createdAt
+			}
+		}
+	}
+}
+
+query {
+	viewer {
+		repositories(first: 50, isForked: true) {
+			nodes {
+				name 
+				parent {
+					name
+					url
+				}
+			}
+		}
+	}
+}
+
+query ReposByTopic($topic: String!, $limit: Int!) {
+	topic(name: $topic) {
+		name
+		repositories(first: $limit, orderBy: { field: UPDATED_BY, direction: DESC }) {
+			nodes {
+				owner {
+					login
+				}
+				name
+				description
+				url
+			}
+		}
+	}
+}
+
+query Search($query: String!) {
+	search(first: 20, query: $query, type: REPOSITORY) {
+		__typename
+		nodes {
+			... on Repository {
+				name
+				description
+				url
+			}
+		}
+	}
+}
+
+
+mutation CreateRepository($input: CreateRepositoryInput!) {
+	createRepository(input: $input) {
+		repository {
+			id
+			name 
+			url
+		}
+	}
+}
+
+{
+	"input": {
+		"name": "test-repo",
+		"description": "Created from GraphQL",
+		"template": "false",
+		"visibility": "PUBLIC"
+	}
+}
+
+Commit some code to the repository
+
+mutation CreateProtectionRule($input: CreateBranchProtectionRuleInput!) {
+	createBranchProtectionRule(rule: $input) {
+	}
+}
+
+{
+	"rule": {
+		"repositoryId": "R_kgDOH1SD4Q",
+		"pattern": "main"
+		"allowsDeletions": false,
+		"requiresApprovingReviews": true,
+		"requiresApprovingReviewCount": 2
+	}
+}
+
