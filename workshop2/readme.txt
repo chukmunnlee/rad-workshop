@@ -1,4 +1,7 @@
-Running with Caddy
+Running with Caddy, requires the following module
+    http.handlers.openapi - chukmunnlee/caddy-openapi
+    http.handlers.rate_limit - RussellLuo/caddy-ext/ratelimit
+
     caddy run -config ./Caddyfile
 
 Validate OpenAPI 
