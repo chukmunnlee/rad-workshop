@@ -1,50 +1,49 @@
-https://www.robinwieruch.de/getting-started-github-graphql-api/
-https://docs.github.com/en/graphql -> References
-
+Question 1
 query {
 	viewer {
-		id
-		name
 		login
-	}
-}
-
-// List the first 50 repositories from the newest
-query {
-	viewer {
-		repositories(first: 50, orderBy: { field: CREATED_AT, direction: DESC }) {
-			nodes {
-				name
-				url
-				description
-				createdAt
-			}
-		}
-	}
-}
-
-query {
-	viewer {
-		repositories(first: 50, isForked: true) {
-			nodes {
-				name 
-				parent {
-					name
-					url
-				}
-			}
-		}
-	}
-}
-
-query ReposByTopic($topic: String!, $limit: Int!) {
-	topic(name: $topic) {
 		name
-		repositories(first: $limit, orderBy: { field: UPDATED_BY, direction: DESC }) {
+		url
+	}
+}
+
+Question 2
+query {
+	viewer {
+		repositories(first: 50, orderBy: { field: PUSHED_AT, direction: DESC }) {
 			nodes {
-				owner {
-					login
-				}
+				name
+				description
+				url
+				forkCount
+			}
+		}
+	}
+}
+
+Question 3
+query { 
+	user(login: "tsandall") {
+		login
+		name
+		url
+		repositories (first: 50, orderBy: { field: PUSHED_AT, direction: DESC}) {
+			nodes {
+				name
+				description
+				url
+				forkCount
+			}
+		}
+	}
+}
+
+Question 4
+query SearchRepoByTopic($name: String!, $limit: Int) {
+	topic(name: $name) {
+		name
+		repositories(first: $limit, orderBy: { field: STARGAZERS, direction: DESC }) {
+			nodes {
 				name
 				description
 				url
@@ -53,20 +52,7 @@ query ReposByTopic($topic: String!, $limit: Int!) {
 	}
 }
 
-query Search($query: String!) {
-	search(first: 20, query: $query, type: REPOSITORY) {
-		__typename
-		nodes {
-			... on Repository {
-				name
-				description
-				url
-			}
-		}
-	}
-}
-
-
+Question 5
 mutation CreateRepository($input: CreateRepositoryInput!) {
 	createRepository(input: $input) {
 		repository {
@@ -86,8 +72,7 @@ mutation CreateRepository($input: CreateRepositoryInput!) {
 	}
 }
 
-Commit some code to the repository
-
+Question 6
 mutation CreateProtectionRule($input: CreateBranchProtectionRuleInput!) {
 	createBranchProtectionRule(rule: $input) {
 	}
@@ -102,4 +87,3 @@ mutation CreateProtectionRule($input: CreateBranchProtectionRuleInput!) {
 		"requiresApprovingReviewCount": 2
 	}
 }
-
