@@ -1,0 +1,65 @@
+openapi: "3.0.3"
+
+info:
+  title: Boardgame Geek
+  description: Search Boardgame Geek 
+  version: "1.0" 
+
+servers:
+- url: bgg-192.168.39.119.nip.io
+  description: Kubernetes deployment
+
+paths:
+  /games:
+    get:
+      description: Get list of games
+      operationId: getGames
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          minimum: 1
+        required: false
+      responses:
+        200:
+          description: Return list of games
+          headers:
+            Accept-Ranges:
+              description: Game range
+              schema:
+                type: string
+            Content-Range:
+              description: Offset and limit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameSummaries"
+        500:
+          description: Error object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    GameSummary:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+      required:
+      - name
+      - url
+    GameSummaries:
+      type: array
+      items:
+        $ref: "#/components/schemas/GameSummary"
+    Error:
+      type: object
+      additionalProperties:
+        type: string
